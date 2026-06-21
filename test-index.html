@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bajeti Yanga Modular — Test</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div style="padding: 2rem; font-family: system-ui; max-width: 600px; margin: 0 auto;">
+    <h1>Bajeti Yanga Modular Test</h1>
+    <p id="status" style="padding: 1rem; background: #f0f0f0; border-radius: 8px; font-weight: 500;">
+      Loading modules...
+    </p>
+    <div id="results" style="margin-top: 2rem;"></div>
+  </div>
+
+  <script type="module">
+    import * as constants from './js/constants.js';
+    import { State } from './js/state.js';
+    import * as helpers from './js/helpers.js';
+
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+
+    try {
+      // Test 1: Constants loaded
+      const hasConstants = constants.TX && constants.ITEM_CATS && constants.APP_VERSION;
+      
+      // Test 2: State object initialized
+      const hasState = State && State.lang !== undefined;
+      
+      // Test 3: Helpers loaded
+      const hasHelpers = helpers.fmt && helpers.MK && helpers.today;
+      
+      // Test 4: Window exposure (tgPW should be on window from helpers.js)
+      const hasWindowFuncs = typeof window.tgPW === 'function';
+
+      const all = hasConstants && hasState && hasHelpers && hasWindowFuncs;
+
+      // Update status
+      statusEl.textContent = all 
+        ? '✅ All modules loaded and connected!' 
+        : '❌ Some modules failed to load';
+      statusEl.style.background = all ? '#d4edda' : '#f8d7da';
+      statusEl.style.color = all ? '#155724' : '#721c24';
+
+      // Show details
+      resultsEl.innerHTML = `
+        <h3>Module Check</h3>
+        <div style="font-family: monospace; font-size: 0.9rem; line-height: 1.6;">
+          <div>${hasConstants ? '✅' : '❌'} constants.js loaded (TX, ITEM_CATS, APP_VERSION)</div>
+          <div>${hasState ? '✅' : '❌'} state.js loaded (State object)</div>
+          <div>${hasHelpers ? '✅' : '❌'} helpers.js loaded (fmt, MK, today)</div>
+          <div>${hasWindowFuncs ? '✅' : '❌'} window.tgPW exposed for onclick handlers</div>
+        </div>
+        <h3 style="margin-top: 2rem;">Sample Data</h3>
+        <div style="font-family: monospace; font-size: 0.85rem; background: #f9f9f9; padding: 1rem; border-radius: 4px;">
+          <div><strong>App Version:</strong> ${constants.APP_VERSION}</div>
+          <div><strong>Current Lang:</strong> ${State.lang}</div>
+          <div><strong>Item Categories:</strong> ${Object.keys(constants.ITEM_CATS).length} loaded</div>
+          <div><strong>Today's Date:</strong> ${helpers.today()}</div>
+        </div>
+      `;
+
+      console.log('✅ Module test complete', {
+        constants: hasConstants,
+        state: hasState,
+        helpers: hasHelpers,
+        windowFuncs: hasWindowFuncs,
+        State,
+        Constants: constants
+      });
+
+    } catch (err) {
+      statusEl.textContent = '❌ Error loading modules';
+      statusEl.style.background = '#f8d7da';
+      statusEl.style.color = '#721c24';
+      resultsEl.innerHTML = `<pre style="color: #721c24; background: #f9f9f9; padding: 1rem; border-radius: 4px;">${err.message}\n${err.stack}</pre>`;
+      console.error('Module load error:', err);
+    }
+  </script>
+</body>
+</html>
